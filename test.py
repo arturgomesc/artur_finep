@@ -11,25 +11,22 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 
-def read_pdf_file(file_path):
-    try:
-        pdf_reader = PdfReader(file_path)
-        document_text = "".join(page.extract_text() + "\n" for page in pdf_reader.pages if page.extract_text())
-        return document_text
-    except Exception as e:
-        logging.error(f"Erro ao processar o arquivo {file_path}: {e}")
-        return None
-
-
 def extract_pdf_texts(directory):
     pdf_texts = []
     for file in os.listdir(directory):
         if file.endswith(".pdf"):
             complete_path = os.path.join(directory, file)
-            document_text = read_pdf_file(complete_path)
-            if document_text:
-                pdf_texts.append(document_text)
-    return pdf_texts
+            try:
+                pdf_reader = PdfReader(complete_path)
+                document_text = ""
+                for page in pdf_reader.pages:
+                    if page.extract_text():
+                        document_text += page.extract_text() + "\n"
+                if document_text:
+                    pdf_texts.append(document_text)
+            except Exception as e:
+                logging.error(f"Erro ao processar o arquivo {complete_path}: {e}")
+            return pdf_texts
 
 
 def save_txt_file(text_content, file_path):
